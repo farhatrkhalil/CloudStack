@@ -1,5 +1,3 @@
-# Define the AWS Provider and version requirements.
-
 terraform {
   required_version = ">= 1.0.0"
 

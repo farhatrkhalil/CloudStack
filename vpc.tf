@@ -1,12 +1,9 @@
-# Build the VPC, Subnets (Public, Private, Data), and Gateways. (Physical isolation between 3 tiers)
-
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   tags                 = { Name = "CloudStack-VPC" }
 }
 
-# --- PUBLIC TIER (Tier 1) ---
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
@@ -23,7 +20,6 @@ resource "aws_subnet" "public_2" {
   tags                    = { Name = "Public-Subnet-2-LoadGen" }
 }
 
-# --- PRIVATE APP TIER (Tier 2) ---
 resource "aws_subnet" "private_app_1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.3.0/24"
@@ -38,7 +34,6 @@ resource "aws_subnet" "private_app_2" {
   tags              = { Name = "Private-App-AZ2" }
 }
 
-# --- DATABASE TIER (Tier 3) ---
 resource "aws_subnet" "data_1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.5.0/24"
@@ -53,7 +48,6 @@ resource "aws_subnet" "data_2" {
   tags              = { Name = "Database-Subnet-2" }
 }
 
-# --- CONNECTIVITY ---
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "CloudStack-IGW" }

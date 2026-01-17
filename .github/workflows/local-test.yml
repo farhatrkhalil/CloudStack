@@ -75,7 +75,49 @@ jobs:
             exit 1
           fi
           
+          # Check for IAM Roles (Security Hardening)
+          if ! grep -q "aws_iam_role" *.tf; then
+            echo "❌ IAM Roles not found!"
+            exit 1
+          fi
+          
+          # Check for Instance Profiles
+          if ! grep -q "aws_iam_instance_profile" *.tf; then
+            echo "❌ IAM Instance Profiles not found!"
+            exit 1
+          fi
+          
           echo "✅ 3-Tier Architecture validation passed!"
+
+      - name: Validate Security Hardening
+        run: |
+          echo "🛡️  Validating security configuration..."
+          
+          # Check for IAM policies
+          if ! grep -q "aws_iam_policy" *.tf; then
+            echo "❌ IAM policies not found!"
+            exit 1
+          fi
+          
+          # Check for IAM roles
+          if ! grep -q "aws_iam_role" *.tf; then
+            echo "❌ IAM roles not found!"
+            exit 1
+          fi
+          
+          # Check for bastion host
+          if ! grep -q "bastion" *.tf; then
+            echo "❌ Bastion host not found!"
+            exit 1
+          fi
+          
+          # Check for S3 restrictions
+          if ! grep -q "Condition.*s3:prefix" *.tf; then
+            echo "❌ S3 access restrictions not found!"
+            exit 1
+          fi
+          
+          echo "✅ Security validation passed!"
 
       - name: Generate Architecture Summary
         run: |
@@ -88,11 +130,16 @@ jobs:
           echo "- ✅ RDS Database (Data Tier)" >> architecture-summary.md
           echo "- ✅ S3 Bucket for storage" >> architecture-summary.md
           echo "- ✅ Security Groups configured" >> architecture-summary.md
+          echo "- ✅ IAM Roles & Policies" >> architecture-summary.md
+          echo "- ✅ Bastion Host for management" >> architecture-summary.md
           echo "" >> architecture-summary.md
           echo "### 🛡️ Security Features:" >> architecture-summary.md
-          echo "- Security Group Chaining" >> architecture-summary.md
+          echo "- Security group chaining" >> architecture-summary.md
           echo "- Private subnets for data layer" >> architecture-summary.md
           echo "- No hardcoded secrets" >> architecture-summary.md
+          echo "- IAM role-based access control" >> architecture-summary.md
+          echo "- S3 bucket path restrictions" >> architecture-summary.md
+          echo "- Read-only bastion access" >> architecture-summary.md
           echo "" >> architecture-summary.md
           echo "### 📊 Infrastructure as Code:" >> architecture-summary.md
           echo "- Terraform configuration validated" >> architecture-summary.md

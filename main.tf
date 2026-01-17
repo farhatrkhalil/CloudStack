@@ -1,6 +1,3 @@
-# Define the EC2 instances, Application Load Balancer, and Target Groups. ("Compute" layer)
-
-# --- Application Load Balancer ---
 resource "aws_lb" "main_alb" {
   name               = "cloudstack-alb"
   internal           = false
@@ -16,17 +13,32 @@ resource "aws_lb_target_group" "app_tg" {
   vpc_id   = aws_vpc.main.id
 }
 
-# --- Compute Instances (App & Server) ---
 resource "aws_instance" "app_server" {
   ami                    = "ami-0c55b159cbfafe1f0"
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.private_app_1.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2_app_profile.name
 
-  tags = { Name = "CloudStack-App-Instance" }
+  tags = {
+    Name = "CloudStack-App-Instance"
+    Role = "Application-Server"
+  }
 }
 
-# --- S3 Integration ---
+resource "aws_instance" "bastion_host" {
+  ami                    = "ami-0c55b159cbfafe1f0"
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public_1.id
+  vpc_security_group_ids = [aws_security_group.alb_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.bastion_profile.name
+
+  tags = {
+    Name = "CloudStack-Bastion-Host"
+    Role = "Management-Host"
+  }
+}
+
 resource "aws_s3_bucket" "data_bucket" {
   bucket = "${var.project_name}-data-storage-${random_id.bucket_suffix.hex}"
   tags   = { Name = "${var.project_name}-S3" }
