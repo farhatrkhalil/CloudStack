@@ -4,28 +4,27 @@
 ![Architecture Diagram](architecture-diagram.png)
 
 ## 📋 Architectural Overview
-This project implements a professional **3-Tier Architecture** designed for enterprise-level reliability. By separating the web, application, and data layers into isolated network zones, this design ensures that the infrastructure is resilient, secure, and easily scalable.
+This project implements a professional **3-Tier Architecture**. Unlike a simple 2-tier setup, the **Data Layer (Oracle DB)** is physically and logically isolated from the Application and Server tiers, ensuring maximum data integrity and security.
 
 ---
 
 ## 🏛️ The "Why" Behind the Design
 
-### 1. Multi-Availability Zone (AZ) Redundancy
-* **The Design:** Infrastructure is mirrored across two distinct AWS Availability Zones.
-* **The "Why":** This ensures **High Availability (HA)**. If an entire AWS data center (AZ) experiences an outage, **Amazon Route 53** and the **Application Load Balancer (ALB)** automatically shift traffic to the healthy zone, resulting in zero downtime.
+### 1. Dedicated Data Tier (Oracle RDS)
+* **The Design:** The Oracle Database is located in its own isolated subnet layer, separate from the App/Server instances.
+* **The "Why":** This is the **3rd Tier**. By isolating the database, we can apply strict security rules that ensure only the application servers can talk to the database, preventing any direct access from the public web or bastion tiers.
 
-### 2. Intelligent Traffic Routing (ALB & Target Groups)
-* **The Design:** External traffic enters via Route 53 and is managed by an **Application Load Balancer**. The ALB routes traffic to a **Target Group** managed by an **Auto Scaling Group**.
-* **The "Why":** This setup allows the system to scale the number of **APP** and **SERVER** instances automatically based on demand while ensuring traffic only hits "healthy" instances.
+### 2. Intelligent Traffic Flow (ALB -> Target Group)
+* **The Design:** External requests enter via **Route 53**, hit the **Application Load Balancer (ALB)**, and are distributed to the **Target Group**.
+* **The "Why":** The Target Group acts as a "waiting room" that ensures traffic is only sent to healthy instances in the Private App/Server subnets.
 
-### 3. Network Isolation (Public vs. Private)
-* **The Design:** * **Public Subnets:** House the **Bastion Host** (for admin access) and the **Load Generator**.
-    * **Private Subnets:** House the **APP Instance**, **SERVER Instance**, and the **Oracle Database**.
-* **The "Why":** Core business logic is unreachable from the public internet. Administrative access is strictly funneled through the Bastion Host.
+### 3. Management & Testing (Public Subnets)
+* **The Design:** The top tier contains a **Bastion Host** for SSH management and a **Load Generator** for performance testing.
+* **The "Why":** These tools are public-facing but serve only to manage or stress-test the private environment.
 
-### 4. Secure Outbound & Monitoring (NAT, S3, CloudWatch)
-* **The Design:** Private instances use a **NAT Gateway** for outbound internet access. They are also integrated with **Amazon S3** for object storage and **Amazon CloudWatch** for real-time logging.
-* **The "Why":** This allows the APP and SERVER instances to securely store data and send logs to CloudWatch for monitoring without requiring a public IP address.
+### 4. Cloud Integration (NAT, S3, & CloudWatch)
+* **The Design:** Private instances communicate with **Amazon S3** and **CloudWatch** via a **NAT Gateway**.
+* **The "Why":** This allows the private instances to offload logs and storage data to managed AWS services without ever needing a public IP address.
 
 ---
 
@@ -33,34 +32,31 @@ This project implements a professional **3-Tier Architecture** designed for ente
 
 | Tool / Service | Category | Purpose |
 | :--- | :--- | :--- |
-| **Terraform** | IaC | Ensures 100% reproducible environment and version-controlled infra. |
-| **Route 53 & ALB** | Networking | Entry point and intelligent load distribution across AZs. |
-| **Auto Scaling Group**| Compute | Manages the lifecycle and scaling of APP/SERVER instances. |
-| **Oracle RDS** | Database | Managed relational database providing automated backups and HA. |
-| **S3 & CloudWatch** | Ops/Storage | Secure data persistence and centralized infrastructure monitoring. |
-| **GitHub Actions** | CI/CD | Implements **Shift-Left** validation (linting and security scans). |
+| **Terraform** | IaC | 100% reproducible environment. |
+| **Route 53 & ALB** | Networking | DNS and intelligent load distribution. |
+| **Oracle RDS** | Database | **Dedicated Tier 3** managed database with Multi-AZ failover. |
+| **S3 & CloudWatch** | Ops/Storage | Persistence and centralized monitoring. |
 
 ---
 
 ## 🚀 Operational Strategy
 
 ### 🛡️ Shift-Left Security
-Before any code is applied to the cloud, it must pass automated checks:
-1. **Terraform Validate:** Ensures the configuration is syntactically correct.
-2. **Security Linting:** Uses `tfsec` to scan for open ports or unencrypted storage before deployment.
+We use **Security Group Chaining**:
+* **ALB SG:** Allows port 80/443 from the world.
+* **App SG:** Allows traffic *only* from the ALB SG.
+* **DB SG:** Allows traffic *only* from the App SG.
 
 ### 💰 FinOps & Cost Optimization
-* **On-Demand Provisioning:** Infra is only deployed for testing and destroyed immediately after.
-* **Right-Sizing:** Utilization of `t3.micro` instances to stay within the AWS Free Tier during development.
+Infrastructure is provisioned using `t3.micro` instances and destroyed after testing to ensure zero wasted spend.
 
 ---
 
 ## 📁 Repository Structure
 ```text
-├── .github/workflows/      # CI/CD Validation Pipelines
-├── vpc.tf                  # Networking: VPC, Subnets, NAT Gateway, Route 53
-├── security.tf             # Security Groups & IAM Roles (S3/CloudWatch access)
-├── compute.tf              # Auto Scaling Group, ALB, and Target Groups
-├── rds.tf                  # Database (Oracle) Layer
-├── variables.tf            # Input variables for customization
-└── providers.tf            # AWS Provider configuration
+├── .github/workflows/      # CI/CD Validation
+├── vpc.tf                  # VPC, Subnets (Public, Private, Data), NAT
+├── security.tf             # SG Chaining & IAM Roles
+├── main.tf                 # Compute, ALB, and Target Groups
+├── rds.tf                  # Oracle DB Tier configuration
+└── providers.tf            # AWS Provider
