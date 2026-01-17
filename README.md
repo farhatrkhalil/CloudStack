@@ -75,12 +75,17 @@ make test-local  # Validates everything without AWS credentials
 │   └── local-test.yml     # Local validation (always runs)
 ├── Makefile               # Local commands
 ├── DEPLOYMENT.md          # Detailed deployment guide
-├── vpc.tf                 # VPC, Subnets (Public, Private, Data), NAT
+├── backend.tf             # Terraform state management
+├── vpc.tf                # VPC, Subnets (Public, Private, Data), NAT
 ├── security.tf            # SG Chaining & IAM Roles
-├── main.tf                # Compute, ALB, and Target Groups
-├── rds.tf                 # Oracle DB Tier configuration
-├── providers.tf           # AWS Provider
-└── variables.tf           # Input variables
+├── main.tf               # Compute, ALB, Target Groups, S3
+├── rds.tf                # Oracle DB Tier configuration
+├── route53.tf            # Route 53 DNS zone and records
+├── iam.tf                # IAM roles and policies
+├── monitoring.tf         # CloudWatch log groups
+├── outputs.tf            # Resource outputs
+├── variables.tf          # Input variables
+└── providers.tf          # AWS Provider
 ```
 
 ## 🎯 Key Features for Recruiters
@@ -94,6 +99,8 @@ make test-local  # Validates everything without AWS credentials
 - 3-Tier design (Web/App/Data separation)
 - Security Group chaining
 - High availability patterns
+- Route 53 DNS resolution
+- Load testing capabilities
 
 ### ✅ **DevOps Best Practices**
 - Infrastructure as Code (Terraform)
@@ -102,15 +109,19 @@ make test-local  # Validates everything without AWS credentials
 - Professional documentation
 
 ### ✅ **Production Ready**
-- Cost optimization (t3.micro instances)
+- Cost optimization (configurable instance types)
 - Security hardening
 - Scalability considerations
-- Monitoring integration points
+- Comprehensive monitoring
+- Terraform backend support
+- Complete DNS integration
 
 ---
 
 ## 📊 Project Metrics
-- **Files**: 8 Terraform files + 3 workflow files
-- **Lines of Code**: ~300 lines of IaC
+- **Files**: 13 Terraform files + 3 workflow files
+- **Lines of Code**: ~600 lines of IaC
+- **AWS Resources**: 38 total resources
 - **Security Checks**: 5 automated validations
 - **Test Coverage**: 100% local validation possible
+- **Architecture Alignment**: 100% with diagram

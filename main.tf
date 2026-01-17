@@ -31,7 +31,7 @@ resource "aws_lb_target_group_attachment" "app_attachment" {
 }
 
 resource "aws_instance" "app_server" {
-  ami                    = "ami-0c55b159cbfafe1f0"
+  ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private_app_1.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
@@ -53,7 +53,7 @@ EOF
 }
 
 resource "aws_instance" "bastion_host" {
-  ami                    = "ami-0c55b159cbfafe1f0"
+  ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_1.id
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
@@ -66,7 +66,7 @@ resource "aws_instance" "bastion_host" {
 }
 
 resource "aws_instance" "load_generator" {
-  ami                    = "ami-0c55b159cbfafe1f0"
+  ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_2.id
   vpc_security_group_ids = [aws_security_group.load_generator_sg.id]
