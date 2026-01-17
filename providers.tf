@@ -8,9 +8,13 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
 provider "aws" {
-  region = "us-east-1" # The region where all resources in the diagram will live
+  region = var.aws_region
 }

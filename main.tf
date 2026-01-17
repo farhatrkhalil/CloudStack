@@ -28,6 +28,10 @@ resource "aws_instance" "app_server" {
 
 # --- S3 Integration ---
 resource "aws_s3_bucket" "data_bucket" {
-  bucket = "cloudstack-data-storage-unique-id" 
-  tags   = { Name = "CloudStack-S3" }
+  bucket = "${var.project_name}-data-storage-${random_id.bucket_suffix.hex}" 
+  tags   = { Name = "${var.project_name}-S3" }
+}
+
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
 }
