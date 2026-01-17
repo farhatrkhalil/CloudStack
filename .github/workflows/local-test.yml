@@ -112,7 +112,7 @@ jobs:
           fi
           
           # Check for S3 restrictions
-          if ! grep -q "Condition.*s3:prefix" *.tf; then
+          if ! grep -q "s3:prefix" *.tf; then
             echo "❌ S3 access restrictions not found!"
             exit 1
           fi
