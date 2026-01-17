@@ -171,3 +171,71 @@ resource "aws_iam_instance_profile" "bastion_profile" {
   name = "cloudstack-bastion-profile"
   role = aws_iam_role.bastion_role.name
 }
+
+resource "aws_iam_role" "load_generator_role" {
+  name = "cloudstack-load-generator-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "CloudStack-Load-Generator-Role"
+  }
+}
+
+resource "aws_iam_policy" "load_generator_policy" {
+  name        = "cloudstack-load-generator-policy"
+  description = "Load testing permissions for load generator"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages",
+          "ec2:DescribeVolumes",
+          "ec2:DescribeSnapshots"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "CloudStack-Load-Generator-Policy"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "load_generator_attachment" {
+  role       = aws_iam_role.load_generator_role.name
+  policy_arn = aws_iam_policy.load_generator_policy.arn
+}
+
+resource "aws_iam_instance_profile" "load_generator_profile" {
+  name = "cloudstack-load-generator-profile"
+  role = aws_iam_role.load_generator_role.name
+}

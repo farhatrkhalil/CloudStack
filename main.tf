@@ -32,7 +32,7 @@ resource "aws_lb_target_group_attachment" "app_attachment" {
 
 resource "aws_instance" "app_server" {
   ami                    = "ami-0c55b159cbfafe1f0"
-  instance_type          = "t3.micro"
+  instance_type          = var.instance_type
   subnet_id              = aws_subnet.private_app_1.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_app_profile.name
@@ -54,7 +54,7 @@ EOF
 
 resource "aws_instance" "bastion_host" {
   ami                    = "ami-0c55b159cbfafe1f0"
-  instance_type          = "t3.micro"
+  instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_1.id
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.bastion_profile.name
@@ -62,6 +62,27 @@ resource "aws_instance" "bastion_host" {
   tags = {
     Name = "CloudStack-Bastion-Host"
     Role = "Management-Host"
+  }
+}
+
+resource "aws_instance" "load_generator" {
+  ami                    = "ami-0c55b159cbfafe1f0"
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.public_2.id
+  vpc_security_group_ids = [aws_security_group.load_generator_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.load_generator_profile.name
+
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+yum update -y
+yum install -y httpd-tools stress
+echo "<h1>CloudStack Load Generator - Ready</h1>" > /var/www/html/index.html
+EOF
+  )
+
+  tags = {
+    Name = "CloudStack-Load-Generator"
+    Role = "Load-Testing"
   }
 }
 
