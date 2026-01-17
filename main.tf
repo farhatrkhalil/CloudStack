@@ -18,7 +18,7 @@ resource "aws_lb_target_group" "app_tg" {
 
 # --- Compute Instances (App & Server) ---
 resource "aws_instance" "app_server" {
-  ami           = "ami-0c55b159cbfafe1f0" 
+  ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.private_app_1.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
@@ -28,7 +28,7 @@ resource "aws_instance" "app_server" {
 
 # --- S3 Integration ---
 resource "aws_s3_bucket" "data_bucket" {
-  bucket = "${var.project_name}-data-storage-${random_id.bucket_suffix.hex}" 
+  bucket = "${var.project_name}-data-storage-${random_id.bucket_suffix.hex}"
   tags   = { Name = "${var.project_name}-S3" }
 }
 
