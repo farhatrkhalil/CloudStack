@@ -2,8 +2,8 @@
 
 # ALB Security Group (Allows web traffic)
 resource "aws_security_group" "alb_sg" {
-  name        = "alb-sg"
-  vpc_id      = aws_vpc.main.id
+  name   = "alb-sg"
+  vpc_id = aws_vpc.main.id
   ingress {
     from_port   = 80
     to_port     = 80
@@ -14,8 +14,8 @@ resource "aws_security_group" "alb_sg" {
 
 # App Security Group (Only allows traffic FROM the ALB)
 resource "aws_security_group" "app_sg" {
-  name        = "app-sg"
-  vpc_id      = aws_vpc.main.id
+  name   = "app-sg"
+  vpc_id = aws_vpc.main.id
   ingress {
     from_port       = 80
     to_port         = 80
@@ -26,8 +26,8 @@ resource "aws_security_group" "app_sg" {
 
 # Database Security Group (Only allows traffic FROM the App)
 resource "aws_security_group" "db_sg" {
-  name        = "db-sg"
-  vpc_id      = aws_vpc.main.id
+  name   = "db-sg"
+  vpc_id = aws_vpc.main.id
   ingress {
     from_port       = 1521 # Oracle Default Port
     to_port         = 1521

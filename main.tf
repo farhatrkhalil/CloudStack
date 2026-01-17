@@ -18,9 +18,9 @@ resource "aws_lb_target_group" "app_tg" {
 
 # --- Compute Instances (App & Server) ---
 resource "aws_instance" "app_server" {
-  ami           = "ami-0c55b159cbfafe1f0"
-  instance_type = "t3.micro"
-  subnet_id     = aws_subnet.private_app_1.id
+  ami                    = "ami-0c55b159cbfafe1f0"
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.private_app_1.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
 
   tags = { Name = "CloudStack-App-Instance" }
